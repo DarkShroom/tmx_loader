@@ -58,6 +58,9 @@ class GID():
     def get_tuple(self):
         return (self.id, self.rotation, self.flip)
 
+    def __repr__(self):
+        return 'GID({},{},{})'.format(self.id,self.rotation, self.flip)
+
 
 class TileLayer():
     name = None
@@ -81,7 +84,7 @@ class ObjectLayerObject():
     width = None
     height = None
 
-    def __str__(self):
+    def __repr__(self):
         s = 'ObjectLayerObject('
         s += ', '.join("%s: %s" % item for item in vars(self).items())
         s += ')'
@@ -157,7 +160,7 @@ class TileSet():
             # print (file)
 
             s = file.read()
-            print(s)
+            # print(s)
             # print('#tileset#' * 4)
 
             root = ET.fromstring(s)  # load xml from string
@@ -268,13 +271,13 @@ class MyTMX():
                                 for val in line:
                                     val = int(val)  # string to int for gid table
 
-                                    tuple_val = None  # empty tiles will be None
+                                    gid = None  # empty tiles will be None
                                     if val != 0:
                                         gid = GID(val)
-                                        tuple_val = gid.get_tuple()  # converts the gid to a split tuple (id,rotation,flip)
+                                        # tuple_val = gid  # converts the gid to a split tuple (id,rotation,flip)
 
                                     map_array_row.append(val)
-                                    map_array_row_tuples.append(tuple_val)  # save with rotation and flip
+                                    map_array_row_tuples.append(gid)  # save with rotation and flip
 
                                 map_array.append(map_array_row)
                                 map_array_tuples.append(map_array_row_tuples)
@@ -352,17 +355,28 @@ class MyTMX():
 
 def test1():
     myTMX = MyTMX('map_rotate_test.tmx')
-    print('&%^*' * 16)
+
+
 
     print(myTMX)
-    # image_name = myTMX.get_image_name(98)
+    # # image_name = myTMX.get_image_name(98)
 
 
-        # print ('SSS', tileset_dict[6])
+    #     # print ('SSS', tileset_dict[6])
 
-    print('SSS', myTMX.gid_to_tile(1))
-    print('SSS', myTMX.gid_to_tile(162))
-    print('SSS', myTMX.gid_to_tile(164))
+    # print('SSS', myTMX.gid_to_tile(1))
+    # print('SSS', myTMX.gid_to_tile(162))
+    print('SSS', myTMX.gid_to_tile(140))
+
+
+    #show image demo
+    image_path = myTMX.gid_to_tile(162).image_source
+    print(image_path)
+    from PIL import Image
+    Image.open(image_path).show()
+
+    # FirstLayer = myTMX.layers[0]
+    # print(FirstLayer)
 
     
 
