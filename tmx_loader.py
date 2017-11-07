@@ -11,6 +11,9 @@ currently has a stratagy for loading linked tilesets
 needs more XML purity, should accept XML elements into some of the objects, allowing better organisation
 
 
+can't work out how to support shapes like rect/elipse, they just lack gid??
+
+
 
 '''
 from __future__ import absolute_import, division, print_function  # , unicode_literals # CAUSES CSV BUG
@@ -22,6 +25,8 @@ import glob
 import csv
 import json
 
+
+from ppretty import ppretty
 
 # from pprint import pprint
 import xml.etree.ElementTree as ET
@@ -68,9 +73,24 @@ class TileLayer():
 # object layer
 
 
+class ObjectLayerObject():
+    gid = None
+    id = None
+    x = None
+    y = None
+    width = None
+    height = None
+
+    def __str__(self):
+        s = 'ObjectLayerObject('
+        s += ', '.join("%s: %s" % item for item in vars(self).items())
+        s += ')'
+        return s
+
+
 class ObjectLayer():
     name = None
-    objects = []  # currently a list of dicts
+    objects = []  # list of ObjectLayerObject()
 
     def __str__(self):
         s = ''
@@ -85,9 +105,30 @@ class TileSetTile():
     id = None  # warning overrides built in function (but it is easier this way)
     type = None
 
-    custom_properties = []
+    # custom_properties = []
 
+    def __str__(self):
+        s = 'TileSetTile('
+        s += ', '.join("%s: %s" % item for item in vars(self).items())
+        s += ')'
+        return s
 
+    def __init__(self, xml_element):
+
+        for key in xml_element.attrib:
+            setattr(self, key, xml_element.attrib[key])
+
+        self.id = int(self.id)  # id must be int
+
+        for child in xml_element:
+            if child.tag == 'image':  # for image tag, make properties of the attributes of the image tag like source => image_source
+                for key in child.attrib:
+                    # print (key)
+                    setattr(self, child.tag + '_' + key, child.attrib[key])
+
+        # print(vars(self))
+
+        # print(self)
 
 
 class TileSet():
@@ -95,60 +136,73 @@ class TileSet():
     loads a TSX file
     '''
 
+    firstgid = None
+    source = None
     tiles = []  # list of TileSetTile()
 
     def __str__(self):
-        s = ''
-        s += '\n'.join("%s: %s" % item for item in vars(self).items())
+        # s = ''
+        # s += '\n'.join("%s: %s" % item for item in vars(self).items())
+        # return s
+
+        s = 'TileSet('
+        s += ', '.join("%s: %s" % item for item in vars(self).items())
+        s += ')'
         return s
 
-    def load(self, filename):
+    def load_from_tsx(self, filename):
 
         with open(filename) as file:
-            print('#tileset#' * 4)
-            print (file)
+            # print('#tileset#' * 4)
+            # print (file)
 
             s = file.read()
             print(s)
-            print('#tileset#' * 4)
+            # print('#tileset#' * 4)
 
             root = ET.fromstring(s)  # load xml from string
 
             for child in root:
-                print(child.tag)
+                # print(child.tag)
 
                 if child.tag == 'grid':
                     # print(child.attrib)
                     pass
 
                 if child.tag == 'tile':
-                    print(child.attrib)
-
-                    tilsettile = TileSetTile()
-                    for key in child.attrib:
-                        setattr(tilsettile, key, child.attrib[key])
+                    tilsettile = TileSetTile(child)  # accepts xml element
                     self.tiles.append(tilsettile)
-
-                    for child2 in child:
-                        # print(child2.tag)
-                        if child2.tag == 'image':
-                            print ('image:', child2.attrib)
-                            pass
-                    pass
-
-            pass
-
-        pass
 
 
 class MyTMX():
 
     debug = False
 
+    tilesets = []
+    layers = []
+    objectgroups = []
+
+
+    
+
+    gid_to_tile_dict = None
+    def gid_to_tile(self, gid):
+        if self.gid_to_tile_dict is None:
+            self.gid_to_tile_dict = {}
+            for tileset in self.tilesets:
+                for tile in tileset.tiles:
+                    actual_gid = tile.id + tileset.firstgid
+                    self.gid_to_tile_dict[actual_gid] = tile
+        return self.gid_to_tile_dict[gid]
+
+
+
     def __init__(self, filename):
         self.load(filename)
 
     def load(self, filename):
+
+        self.filename = filename
 
         dirname = os.path.dirname(filename)
 
@@ -182,8 +236,10 @@ class MyTMX():
                     for key in child.attrib:  # add all the keys
                         setattr(tileset, key, child.attrib[key])
 
+                    tileset.firstgid = int(tileset.firstgid)
+
                     tileset_filename = child.attrib['source']  # TODO: WARNING RELATIVE PATH
-                    tileset.load(tileset_filename)
+                    tileset.load_from_tsx(tileset_filename)
 
                     self.tilesets.append(tileset)
 
@@ -247,22 +303,46 @@ class MyTMX():
                         if child2.tag == 'object':
                             if self.debug:
                                 print('object:', child2.attrib)
-                            objectgroup.objects.append(child2.attrib)
+                            objectLayerObject = ObjectLayerObject()
+                            for key in child2.attrib:
+
+                                setattr(objectLayerObject, key, child2.attrib[key])
+                                if key == 'gid':
+                                    objectLayerObject.gid = GID(int(objectLayerObject.gid)).get_tuple()
+
+                            objectgroup.objects.append(objectLayerObject)
 
                     if self.debug:
                         print (objectgroup)
                     self.objectgroups.append(objectgroup)
 
+    def get_image_name(self, gid):
+
+        print ('get_image_name', gid)
+
+        for tileset in self.tilesets:
+            # print (tileset.source , '::')
+            # print ('--' , tileset)
+
+            for tile in tileset.tiles:
+                # print(tile)
+
+                pass
+
+        pass
+
     def __str__(self):
         s = ''
+        s += 'tmx file: {}\n'.format(self.filename)
         # s = 'tile layers:\n'
-        for layer in myTMX.layers:
-            # s+=layer.name + '\n'
+        s += '\n'
+        for layer in self.layers:
+            s += 'layer: {}\n'.format(layer.name)
             s += str(layer) + '\n'
             s += '#' * 8 + '\n'
 
         # s += 'object layers:\n'
-        for object_layer in myTMX.objectgroups:
+        for object_layer in self.objectgroups:
             # s += object_layer.name + '\n'
             s += str(object_layer) + '\n'
             s += '#' * 8 + '\n'
@@ -270,8 +350,21 @@ class MyTMX():
         return s
 
 
-myTMX = MyTMX('map_rotate_test.tmx')
-# print(myTMX)
+def test1():
+    myTMX = MyTMX('map_rotate_test.tmx')
+    print('&%^*' * 16)
+
+    print(myTMX)
+    # image_name = myTMX.get_image_name(98)
 
 
-# from ppretty import ppretty #pip install
+        # print ('SSS', tileset_dict[6])
+
+    print('SSS', myTMX.gid_to_tile(1))
+    print('SSS', myTMX.gid_to_tile(162))
+    print('SSS', myTMX.gid_to_tile(164))
+
+    
+
+
+test1()
