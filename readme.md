@@ -1,4 +1,9 @@
-Loads TMX files (yet another tmx loader)
+Loads TMX files (yet another tmx loader)... Designed for my personal Love 2D project, to make everything far simpler for easy json conversion.
+
+WARNING, back everything up! The code currently runs a glob on all TMX files, it shouldn't overwrite anything but I don't want to be accused of malware! :)
+
+
+
 
 myTMX = MyTMX('somefile.tmx')
 
