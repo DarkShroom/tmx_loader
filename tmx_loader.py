@@ -531,60 +531,13 @@ class MyTMX():
 
         return s
 
-    def json_file_format1(self):
+    def tmx_to_dict(self):
         '''
-        just the first layers
-
-        dict with keys as:
-        map (2D array of (key, rotation, flip))
-        tiles (dict of dicts with tile info)
-        objects (list of objects as dicts)
+        take ALL the tmx data and compile it to a simple dictionary format (ready for conversion to json)
+        the final format has all object layers, all tile layers, and also all tiles compiled to one dictionary
         '''
 
-        d = {}
-
-        tile_layer = self.tile_layers[0]
-
-        gidmap = tile_layer.data
-
-        keymap = []
-        for y in gidmap:
-            row = []
-            for x in y:
-                # tile = None
-                tile = {}
-                if x is not 0 or None:
-                    # tile = x.get_tuple()
-                    tile = {}
-                    tile['id'] = x[0]
-                    tile['rotation'] = x[1]
-                    tile['flip'] = x[2]
-                if tile is None:
-                    tile = 0
-                row.append(tile)
-            keymap.append(row)
-        d['map'] = keymap
-
-        tiledict = {}
-        for key in self.gid_to_tile_dict:
-            tiledict[key] = vars(self.gid_to_tile_dict[key])
-        d['tiles'] = tiledict
-
-        objects = self.object_layers[0].objects
-        oblist = []
-        for ob in objects:
-            oblist.append(vars(ob))
-        d['objects'] = oblist
-
-        # print(vars(tile_layer))
-
-        return d
-
-    def json_file_format2(self):
-
-        print(vars(self))
-
-        d = {}
+        d = {}  # the final dict
 
         tile_layers = []
         for layer in self.tile_layers:
@@ -622,103 +575,15 @@ class MyTMX():
             tiledict[key] = vars(self.gid_to_tile_dict[key])
         d['tiles'] = tiledict
 
-        # print (d)
-        # return(vars(self))
-
         return d
+
+        
 
 
 def write_json_file(filename, data):
     with open(filename, 'w') as json_file:
         json_file.write(json.dumps(data, indent=4))
         # json_file.write(json.dumps(data))
-
-
-def test1():
-
-    filename = 'TestGID.tmx'
-    myTMX = MyTMX(filename)
-
-    # print(myTMX)
-    # # image_name = myTMX.get_image_name(98)
-
-    #     # print ('SSS', tileset_dict[6])
-
-    # print('SSS', myTMX.gid_to_tile(1))
-    # print('SSS', myTMX.gid_to_tile(162))
-    # print('gid_to_tile', myTMX.gid_to_tile(163))
-    # myTMX.gid_to_tile(162).show_image()
-
-    gidMap = myTMX.layers[0].data
-    # print(gidMap)
-
-    image_list = []
-
-    for y in gidMap:
-        row = ''
-        for x in y:
-            # row += str(x) + ', '
-
-            if x is not None:
-                row += '{}'.format(str(x.id))
-
-                gid_to_tile = myTMX.gid_to_tile(x.id)
-
-                print (gid_to_tile)
-            row += ','
-        print (row)
-    print('%' * 8)
-    print()
-
-    print ('compmap:')
-    compmap = []
-    for y in gidMap:
-        row = []
-        for x in y:
-            # row.append(x)
-            tile = None
-            if x is not None:
-                tile = myTMX.gid_to_tile(x.id)
-                tile = vars(tile)
-            row.append(tile)
-        compmap.append(row)
-    for y in compmap:
-        print (y)
-    write_json_file(filename + '.compmap.json', compmap)
-    print()
-
-    print ('keymap:')
-    keymap = []
-    for y in gidMap:
-        row = []
-        for x in y:
-            tile = None
-            if x is not None:
-                tile = x.get_tuple()
-            row.append(tile)
-        keymap.append(row)
-    for y in keymap:
-        print (y)
-    print()
-
-    for key in myTMX.gid_to_tile_dict:
-        print (key, myTMX.gid_to_tile_dict[key])
-
-    print()
-
-    print('object layer:')
-    objectlayer = myTMX.objectgroups[0]
-    print(vars(objectlayer))
-    for ob in objectlayer.objects:
-        print (ob)
-
-    # for tileset in myTMX.tilesets:
-    #     print (tileset)
-    #     for tile in tileset.tiles:
-    #         print (tile)
-
-        # print (row)
-# test1()
 
 
 def batchProcessAllTMX():
@@ -733,7 +598,7 @@ def batchProcessAllTMX():
     for filename in glob('*.tmx'):
         print('found file {}'.format(filename))
         myTMX = MyTMX(filename)
-        write_json_file(filename + '.format2.json', myTMX.json_file_format2())
+        write_json_file(filename + '.format2.json', myTMX.tmx_to_dict())
 
 
 batchProcessAllTMX()
