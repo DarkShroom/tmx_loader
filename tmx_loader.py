@@ -90,6 +90,7 @@ class ObjectLayerObject():
     y = None
     width = None
     height = None
+    visible = None
 
     def __repr__(self):
         s = 'ObjectLayerObject('
@@ -99,27 +100,61 @@ class ObjectLayerObject():
 
     def __init__(self, xml_element):
 
-        for child in xml_element:  # custom properties first so they are overridden in conflicts
+        self.object_type = None  # is used to identify what type of object this is
+        # rectangle
+        # ellipse
+        # polygon
+        # polyline
+        # tile
+        # text
+
+        for child in xml_element:  # custom properties first so they are overridden in conflicts with default ones
             if child.tag == 'properties':
                 for child2 in child:
-                    print(child2.attrib)
                     name = child2.attrib['name']
                     value = child2.attrib['value']
 
-                    try:
-                        type_ = child2.attrib['type']
-                        if type_ == 'int':
-                            value = int(value)
-                        if type_ == 'float':
-                            value = float(value)
-                        if type_ == 'bool':
-                            value = bool(value)
-
-                    except Exception as e:
-                        # print(type(e), e)
-                        pass
+                    # correct the custom property from string to the actual type
+                    type_ = child2.attrib['type']
+                    if type_ == 'int':
+                        value = int(value)
+                    if type_ == 'float':
+                        value = float(value)
+                    if type_ == 'bool':  # the tmx format has a string here true|false
+                        if value == 'true':
+                            value = True
+                        elif value == 'false':
+                            value = False
 
                     setattr(self, name, value)
+
+            elif child.tag == 'ellipse':
+                self.object_type = 'ellipse'
+
+            elif child.tag == 'polyline':
+                self.polyline_points = []
+                for coor in child.attrib['points'].split(' '):  # turn the points string to arrays of floats
+                    coor = coor.split(',')
+                    coor = [float(i) for i in coor]
+                    self.polyline_points.append(coor)
+                self.object_type = 'polyline'
+
+            elif child.tag == 'text':
+                self.object_type = 'text'
+
+            elif child.tag == 'polygon':
+                self.polygon_points = []
+                for coor in child.attrib['points'].split(' '):  # turn the points string to arrays of floats
+                    coor = coor.split(',')
+                    coor = [float(i) for i in coor]
+                    self.polygon_points.append(coor)
+                    self.object_type = 'polygon'
+
+        if self.object_type is None:  # if we found no object_type so far, we must be a rectangle or a tile
+            if 'gid' in xml_element.attrib:  # a gid means tile
+                self.object_type = 'tile'
+            else:
+                self.object_type = 'rectangle'
 
         for key in xml_element.attrib:
             setattr(self, key, xml_element.attrib[key])
@@ -130,6 +165,7 @@ class ObjectLayerObject():
                 self.gid = gid_ob.id
                 self.gid_tuple = gid_ob.get_tuple()
 
+        # attaempt to convert any found values from strings to the actual types
         try:  # x => float
             self.x = float(self.x)
         except Exception as e:
@@ -160,6 +196,16 @@ class ObjectLayerObject():
         except Exception as e:
             pass
 
+        if self.visible == '0':  # if we have a visible tag as 0 make false
+            self.visible = False
+        else:
+            self.visible = True
+
+        if self.object_type == 'tile':
+            # if we have detected a tile, we need this odd hack to ensure it lines up with top-left origins
+            # unfortunatly in the tiled format there is this contradiction
+            self.y = self.y - self.height
+
 
 class ObjectLayer():
 
@@ -183,10 +229,13 @@ class ObjectLayer():
                 objectLayerObject = ObjectLayerObject(child)
                 self.objects.append(objectLayerObject)
 
-        try:
-            self.visible = bool(self.visible)
-        except Exception as e:
-            print(type(e), e)
+        # try:
+        if self.visible == '0':
+            self.visible = False
+        else:
+            self.visible = True
+        # except Exception as e:
+        #     print(type(e), e)
 
 
 class TileSetTile():
@@ -718,4 +767,4 @@ print (json.dumps(jsonCompatClass)) #does not work
 
 '''
 
-
+print(bool('false'))
