@@ -1,4 +1,4 @@
-Loads TMX files
+Loads TMX files (yet another tmx loader)
 
 
 myTMX = MyTMX('somefile.tmx')
@@ -13,4 +13,5 @@ capable of linking to the tile data, to look up a gid (to find it's image and de
 myTMX.gid_to_tile(gid) #gid does not include rotation
 
 
-Currently experimental, but reflects all the linked data, just needs refactoring
+
+Code in experiemental alpha state, currently works though to translate all the tiles in the current directory to a format such that we 
