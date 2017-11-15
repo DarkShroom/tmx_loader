@@ -90,7 +90,7 @@ class ObjectLayerObject():
     y = None
     width = None
     height = None
-    visible = None
+    visible = True
 
     def __repr__(self):
         s = 'ObjectLayerObject('
@@ -133,10 +133,10 @@ class ObjectLayerObject():
 
             elif child.tag == 'polyline':
                 self.polyline_points = []
-                for coor in child.attrib['points'].split(' '):  # turn the points string to arrays of floats
+                for coor in child.attrib['points'].split(' '):  # turn the points string to a list of floats [x1,y1,x2,y2,x3,y3...]
                     coor = coor.split(',')
                     coor = [float(i) for i in coor]
-                    self.polyline_points.append(coor)
+                    self.polyline_points += coor
                 self.object_type = 'polyline'
 
             elif child.tag == 'text':
@@ -144,10 +144,10 @@ class ObjectLayerObject():
 
             elif child.tag == 'polygon':
                 self.polygon_points = []
-                for coor in child.attrib['points'].split(' '):  # turn the points string to arrays of floats
+                for coor in child.attrib['points'].split(' '):  # turn the points string to a list of floats [x1,y1,x2,y2,x3,y3...]
                     coor = coor.split(',')
                     coor = [float(i) for i in coor]
-                    self.polygon_points.append(coor)
+                    self.polygon_points += coor
                     self.object_type = 'polygon'
 
         if self.object_type is None:  # if we found no object_type so far, we must be a rectangle or a tile
@@ -196,9 +196,13 @@ class ObjectLayerObject():
         except Exception as e:
             pass
 
-        if self.visible == '0':  # if we have a visible tag as 0 make false
-            self.visible = False
-        else:
+        try:
+            if self.visible == '0':  # if we have a visible tag as 0 make false
+                self.visible = False
+            else:
+                self.visible = True
+        except Exception as e:
+            print(type(e),e)
             self.visible = True
 
         if self.object_type == 'tile':
@@ -210,7 +214,7 @@ class ObjectLayerObject():
 class ObjectLayer():
 
     name = None
-    visible = None
+    visible = True
     objects = None  # list of ObjectLayerObject()
 
     def __str__(self):
@@ -229,13 +233,14 @@ class ObjectLayer():
                 objectLayerObject = ObjectLayerObject(child)
                 self.objects.append(objectLayerObject)
 
-        # try:
-        if self.visible == '0':
-            self.visible = False
-        else:
+        try:
+            if self.visible == '0':
+                self.visible = False
+            else:
+                self.visible = True
+        except Exception as e:
+            print(type(e), e)
             self.visible = True
-        # except Exception as e:
-        #     print(type(e), e)
 
 
 class TileSetTile():
@@ -450,6 +455,8 @@ class MyTMX():
                         layer.visible = bool(layer.visible)
                     except Exception as e:
                         print(type(e), e)
+                        layer.visible = True
+
 
                     layer_old = {}
                     layer_old.update(child.attrib)
@@ -552,7 +559,7 @@ class MyTMX():
 
             # method two, just add the vars dict, as our map is just tuples now
             vars_dict = vars(layer)
-            print(vars_dict)
+            # print(vars_dict)
             tile_layers.append(vars_dict)
 
         d['tile_layers'] = tile_layers
@@ -577,7 +584,7 @@ class MyTMX():
 
         return d
 
-        
+
 
 
 def write_json_file(filename, data):
@@ -598,7 +605,7 @@ def batchProcessAllTMX():
     for filename in glob('*.tmx'):
         print('found file {}'.format(filename))
         myTMX = MyTMX(filename)
-        write_json_file(filename + '.format2.json', myTMX.tmx_to_dict())
+        write_json_file(filename + '.json', myTMX.tmx_to_dict())
 
 
 batchProcessAllTMX()
@@ -632,4 +639,3 @@ print (json.dumps(jsonCompatClass)) #does not work
 
 '''
 
-print(bool('false'))
