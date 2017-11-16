@@ -1,42 +1,29 @@
 '''
 
-todo:
-xml load in object layers (like tile layer)
-remove debug prints
+Loads TMX in a simple object format, a much simpler format than other TMX loaders.
+
+Design Goals are simplicity and usability over performance. It's still a fraction of a second it seems to take to process my whole forlder of maps.
 
 
-Loads a Tiled map file (tmx) and linked tilesets (tsx) into an easy to use Python object
 
-Translates GID to tile information, supports multiple tilesets
+-Simplifys certain aspects of the format, for example, custom properties are alongside default ones.
+-GIDs have their flags removed to get easy access to Rotation and Flip
+-Coordinate contradictions are dealt with, like objects/rectangles (rotations can still be wrong here)
+-Tilesets are mereged to a lookup dictionary
+-Many properties are converted to correct types, like int, float, bool etc
 
-Uses XML parser, not a TMX lib
 
-
-Issues:
-
--Absolute paths? unsure
-
--Custom properties cannot be the same as keywords like:
-    image_source
-    image_width
-    image_height
-    type
-    is
-This is by design, it makes it easier to access custom properties and has a simpler object model
-
--Supports future and unknown tags by setting class objects using setattr, but this means some python functions get overshadowed, like "id" and "type"
-    This makes things simpler, and does not affect usage scenarios
-
-- Embedded tilesets unsupported
+Currently one big file, set up to glob the whole folder and turn all
+filename.tmx => filename.tmx.json
 
 
 '''
 from __future__ import absolute_import, division, print_function  # , unicode_literals # CAUSES CSV BUG
 
-import os  # TODO
+import os
 import xml.etree.ElementTree as ET
 import json
-from pprint import pprint
+from glob import glob
 
 
 def string_to_default(val):
@@ -666,54 +653,14 @@ class MyTMX():
         return d
 
 
-def write_json_file(filename, data):
-    with open(filename, 'w') as json_file:
-        json_file.write(json.dumps(data, indent=4))
-        # json_file.write(json.dumps(data))
-
-
-def batchProcessAllTMX():
-
-    # filename = 'ObjectMap1.tmx'
-    # myTMX = MyTMX(filename)
-    # write_json_file(filename + '.format1.json', myTMX.json_file_format1())
-    # write_json_file(filename + '.format2.json', myTMX.json_file_format2())
-
-    from glob import glob
+def process_all_tmx_in_folder():
 
     for filename in glob('*.tmx'):
         print('found file {}'.format(filename))
         myTMX = MyTMX(filename)
-        write_json_file(filename + '.json', myTMX.tmx_to_dict())
+
+        with open(filename + '.json', 'w') as json_file:
+            json_file.write(json.dumps(myTMX.tmx_to_dict(), indent=4))
 
 
-batchProcessAllTMX()
-
-'''
-old_print = print
-def print(*args, **kwargs):
-    old_print('overshadowed print:',*args, **kwargs)
-print('sss', 'gsgsgs')
-'''
-
-
-'''
-print (json.dumps({'hello': 'balls', 11 : 'some num'}))
-
-class JSONCompatClass:
-
-
-    def __init__(self):
-        self.x = 44
-        self.s = 'sshshs'
-
-    def __repr__(self):
-        return str(vars(self))
-
-    pass
-
-jsonCompatClass = JSONCompatClass()
-
-print (json.dumps(jsonCompatClass)) #does not work
-
-'''
+process_all_tmx_in_folder()

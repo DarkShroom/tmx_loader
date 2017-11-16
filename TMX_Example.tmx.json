@@ -1,0 +1,203 @@
+{
+    "tile_layers": [
+        {
+            "width": 8, 
+            "visible": true, 
+            "name": "Tile Layer 1", 
+            "data": [
+                [
+                    [
+                        1, 
+                        0, 
+                        0
+                    ], 
+                    [
+                        1, 
+                        0, 
+                        0
+                    ], 
+                    [
+                        1, 
+                        0, 
+                        0
+                    ], 
+                    0, 
+                    0, 
+                    0, 
+                    [
+                        2, 
+                        0, 
+                        0
+                    ], 
+                    [
+                        2, 
+                        0, 
+                        0
+                    ]
+                ], 
+                [
+                    [
+                        1, 
+                        0, 
+                        0
+                    ], 
+                    0, 
+                    0, 
+                    0, 
+                    0, 
+                    0, 
+                    0, 
+                    [
+                        2, 
+                        0, 
+                        0
+                    ]
+                ], 
+                [
+                    [
+                        1, 
+                        0, 
+                        0
+                    ], 
+                    0, 
+                    0, 
+                    0, 
+                    0, 
+                    0, 
+                    0, 
+                    [
+                        2, 
+                        0, 
+                        0
+                    ]
+                ], 
+                [
+                    [
+                        1, 
+                        0, 
+                        0
+                    ], 
+                    0, 
+                    0, 
+                    0, 
+                    0, 
+                    0, 
+                    0, 
+                    0
+                ], 
+                [
+                    0, 
+                    0, 
+                    [
+                        3, 
+                        0, 
+                        0
+                    ], 
+                    [
+                        3, 
+                        0, 
+                        0
+                    ], 
+                    [
+                        3, 
+                        0, 
+                        0
+                    ], 
+                    [
+                        3, 
+                        0, 
+                        0
+                    ], 
+                    0, 
+                    0
+                ], 
+                [
+                    0, 
+                    0, 
+                    0, 
+                    0, 
+                    0, 
+                    0, 
+                    0, 
+                    0
+                ], 
+                [
+                    0, 
+                    0, 
+                    0, 
+                    0, 
+                    0, 
+                    0, 
+                    [
+                        2, 
+                        0, 
+                        0
+                    ], 
+                    0
+                ], 
+                [
+                    [
+                        1, 
+                        0, 
+                        0
+                    ], 
+                    [
+                        1, 
+                        0, 
+                        0
+                    ], 
+                    [
+                        1, 
+                        0, 
+                        0
+                    ], 
+                    0, 
+                    0, 
+                    0, 
+                    [
+                        2, 
+                        0, 
+                        0
+                    ], 
+                    [
+                        2, 
+                        0, 
+                        0
+                    ]
+                ]
+            ], 
+            "height": 8
+        }
+    ], 
+    "renderorder": "right-down", 
+    "orientation": "orthogonal", 
+    "tileheight": 8, 
+    "tiledversion": "1.0.3", 
+    "tilewidth": 8, 
+    "tiles": {
+        "1": {
+            "image_source": "image_examples/check1.png", 
+            "image_height": 8, 
+            "id": 0, 
+            "image_width": 8
+        }, 
+        "2": {
+            "image_source": "image_examples/check2.png", 
+            "image_height": 8, 
+            "id": 1, 
+            "image_width": 8
+        }, 
+        "3": {
+            "image_source": "image_examples/check3.png", 
+            "image_height": 8, 
+            "id": 2, 
+            "image_width": 8
+        }
+    }, 
+    "filename": "TMX_Example.tmx", 
+    "width": 8, 
+    "object_layers": [], 
+    "version": 1.0, 
+    "height": 8, 
+    "nextobjectid": 1
+}
