@@ -17,3 +17,9 @@ Design Goals are simplicity and usability over performance. It's still a fractio
 
 Currently one big file, set up to glob the whole folder and turn all
 filename.tmx => filename.tmx.json
+
+
+limitations:
+
+-only orthographic maps (no plans for isometric, it's not of interest to me)
+-tile layers must be csv (not xml or compressed), might update this
