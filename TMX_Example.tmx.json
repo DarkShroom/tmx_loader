@@ -196,8 +196,86 @@
     }, 
     "filename": "TMX_Example.tmx", 
     "width": 8, 
-    "object_layers": [], 
+    "object_layers": [
+        {
+            "visible": true, 
+            "objects": [
+                {
+                    "visible": true, 
+                    "object_type": "rectangle", 
+                    "height": 16.0, 
+                    "width": 16.0, 
+                    "y": 0.0, 
+                    "x": 0.0, 
+                    "id": 1
+                }, 
+                {
+                    "visible": true, 
+                    "object_type": "ellipse", 
+                    "height": 16.0, 
+                    "width": 16.0, 
+                    "y": 0.0, 
+                    "x": 24.0, 
+                    "id": 2
+                }, 
+                {
+                    "object_type": "polygon", 
+                    "polygon_points": [
+                        0.0, 
+                        0.0, 
+                        16.0, 
+                        -16.0, 
+                        24.0, 
+                        0.0, 
+                        16.0, 
+                        8.0
+                    ], 
+                    "visible": true, 
+                    "y": 40.0, 
+                    "x": 0.0, 
+                    "id": 3
+                }, 
+                {
+                    "polyline_points": [
+                        0.0, 
+                        0.0, 
+                        -24.0, 
+                        8.0, 
+                        0.0, 
+                        16.0, 
+                        -24.0, 
+                        24.0, 
+                        -8.0, 
+                        32.0
+                    ], 
+                    "object_type": "polyline", 
+                    "visible": true, 
+                    "y": 16.0, 
+                    "x": 64.0, 
+                    "id": 4
+                }, 
+                {
+                    "gid_rotation": 0, 
+                    "object_type": "tile", 
+                    "visible": true, 
+                    "height": 16.0, 
+                    "width": 16.0, 
+                    "gid_flip": 0, 
+                    "gid": 1, 
+                    "y": 48.0, 
+                    "x": 24.0, 
+                    "gid_tuple": [
+                        1, 
+                        0, 
+                        0
+                    ], 
+                    "id": 5
+                }
+            ], 
+            "name": "Object Layer 1"
+        }
+    ], 
     "version": 1.0, 
     "height": 8, 
-    "nextobjectid": 1
+    "nextobjectid": 6
 }
