@@ -39,6 +39,22 @@ import json
 from pprint import pprint
 
 
+def string_to_default(val):
+    '''
+    convert string to int or float
+    '''
+    try:
+        val = int(val)
+    except Exception as e:
+        # print(type(e), e)
+        try:
+            val = float(val)
+        except Exception as e:
+            # print(type(e), e)
+            pass
+    return val
+
+
 class GID():
     '''
     My GID translation object
@@ -80,6 +96,32 @@ class TileLayer():
 # object layer
 
 
+class TMX_Property:
+    '''
+    accepts dict of property attrib
+    returns object of property with corrected types
+    '''
+
+    def __init__(self, tag):
+        name = tag['name']
+        type = tag['type']
+        value = tag['value']
+
+        if type == 'int':
+            value = int(value)
+        if type == 'float':
+            value = float(value)
+        if type == 'bool':  # the tmx format has a string here true|false
+            if value == 'true':
+                value = True
+            elif value == 'false':
+                value = False
+
+        self.name = name
+        self.type = type
+        self.value = value
+
+
 class ObjectLayerObject():
     '''
     todo add the init
@@ -111,22 +153,26 @@ class ObjectLayerObject():
         for child in xml_element:  # custom properties first so they are overridden in conflicts with default ones
             if child.tag == 'properties':
                 for child2 in child:
-                    name = child2.attrib['name']
-                    value = child2.attrib['value']
 
-                    # correct the custom property from string to the actual type
-                    type_ = child2.attrib['type']
-                    if type_ == 'int':
-                        value = int(value)
-                    if type_ == 'float':
-                        value = float(value)
-                    if type_ == 'bool':  # the tmx format has a string here true|false
-                        if value == 'true':
-                            value = True
-                        elif value == 'false':
-                            value = False
+                    # name = child2.attrib['name']
+                    # value = child2.attrib['value']
 
-                    setattr(self, name, value)
+                    # # correct the custom property from string to the actual type
+                    # type_ = child2.attrib['type']
+                    # if type_ == 'int':
+                    #     value = int(value)
+                    # if type_ == 'float':
+                    #     value = float(value)
+                    # if type_ == 'bool':  # the tmx format has a string here true|false
+                    #     if value == 'true':
+                    #         value = True
+                    #     elif value == 'false':
+                    #         value = False
+
+                    # setattr(self, name, value)
+
+                    tmx_Property = TMX_Property(child2.attrib)
+                    setattr(self, tmx_Property.name, tmx_Property.value)
 
             elif child.tag == 'ellipse':
                 self.object_type = 'ellipse'
@@ -202,7 +248,7 @@ class ObjectLayerObject():
             else:
                 self.visible = True
         except Exception as e:
-            print(type(e),e)
+            print(type(e), e)
             self.visible = True
 
         if self.object_type == 'tile':
@@ -277,6 +323,7 @@ class TileSetTile():
                 for child2 in child:
                     if child2.tag == 'property':  # found a custom property
 
+                        '''
                         name = child2.attrib['name']
                         value = child2.attrib['value']
 
@@ -294,6 +341,12 @@ class TileSetTile():
                             pass
 
                         setattr(self, name, value)
+                        '''
+
+                        tmx_Property = TMX_Property(child2)
+                        setattr(self, tmx_Property.name, tmx_Property.value)
+
+                        pass
 
         for key in xml_element.attrib:  # set all the normal attribs
             setattr(self, key, xml_element.attrib[key])
@@ -427,11 +480,33 @@ class MyTMX():
 
             root = ET.fromstring(s)  # load xml from string
 
+            print ('root.attrib:', root.attrib)
+
+            for key in root.attrib:
+
+                val = root.attrib[key]
+
+                # try:
+                #     val = int(val)
+                # except Exception as e:
+                #     print(type(e), e)
+                val = string_to_default(val)
+
+                setattr(self, key, val)
+                pass
+
             for child in root:
+
+                if child.tag == 'properties':
+                    # print('^^^^^^^^^^^^^^^^')
+                    for child2 in child:
+                        # print(child2.attrib)
+                        # setattr(self, child2.attrib['name'], child2.attrib['value']
+                        tmx_Property = TMX_Property(child2.attrib)
+                        setattr(self, tmx_Property.name, tmx_Property.value)
 
                 if child.tag == 'tileset':  # found a tileset
                     # print ('tileset:', child.attrib)
-
                     tileset_filename = child.attrib['source']  # TODO: WARNING RELATIVE PATH
 
                     # print('', child.attrib)
@@ -456,7 +531,6 @@ class MyTMX():
                     except Exception as e:
                         print(type(e), e)
                         layer.visible = True
-
 
                     layer_old = {}
                     layer_old.update(child.attrib)
@@ -582,9 +656,14 @@ class MyTMX():
             tiledict[key] = vars(self.gid_to_tile_dict[key])
         d['tiles'] = tiledict
 
+        for prop_name in vars(self):
+            v = getattr(self, prop_name)
+            valid_types = [str, float, int]
+            for valid_type in valid_types:
+                if type(v) == valid_type:
+                    d[prop_name] = v
+
         return d
-
-
 
 
 def write_json_file(filename, data):
@@ -638,4 +717,3 @@ jsonCompatClass = JSONCompatClass()
 print (json.dumps(jsonCompatClass)) #does not work
 
 '''
-
