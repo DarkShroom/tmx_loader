@@ -24,6 +24,32 @@ import os
 import xml.etree.ElementTree as ET
 import json
 from glob import glob
+import sys
+
+
+def hexcolor_to_col(string):
+    '''
+    #b07a5e => (176, 94, 94) # no alpha
+    #70b07a5e => (112, 176, 122, 94) # alpha
+    '''
+    # string = string.strip('#')
+
+    if string[0] != '#':
+        # print('777777')
+        pass
+
+
+    r = string[1:3]  # cut string
+    g = string[3:5]
+    b = string[5:7]
+    a = 'ff'  # default max alpha
+    if len(string) == 9:  # if we have alpha value
+        a = string[7:9]
+    r = int(float.fromhex(r))  # convert to int
+    g = int(float.fromhex(g))
+    b = int(float.fromhex(b))
+    a = int(float.fromhex(a))
+    return (r, g, b, a)
 
 
 def string_to_default(val):
@@ -91,7 +117,9 @@ class TMX_Property:
 
     def __init__(self, tag):
         name = tag['name']
-        type = tag['type']
+        type = None
+        if 'type' in tag:
+            type = tag['type']
         value = tag['value']
 
         if type == 'int':
@@ -103,6 +131,9 @@ class TMX_Property:
                 value = True
             elif value == 'false':
                 value = False
+        if type == 'color':
+            value = hexcolor_to_col(value)
+
 
         self.name = name
         self.type = type
@@ -343,6 +374,15 @@ class TileSetTile():
                 for key in child.attrib:
                     setattr(self, child.tag + '_' + key, child.attrib[key])
 
+            if child.tag == 'animation':
+                print('WARNING ANIMATIONS ARE NOT YET RESOLVED')
+                self.animation = []
+                for child2 in child:
+                    # print(child2, child2.attrib)
+                    self.animation.append(child2.attrib['tileid'])
+
+
+
         # try to convert values from the strings in the tmx
         try:
             self.id = int(self.id)
@@ -472,6 +512,9 @@ class MyTMX():
             for key in root.attrib:
 
                 val = root.attrib[key]
+
+                if key == 'backgroundcolor':
+                    val = hexcolor_to_col(val)
 
                 # try:
                 #     val = int(val)
@@ -654,8 +697,11 @@ class MyTMX():
 
 
 def process_all_tmx_in_folder():
+    process_all_glob('*.tmx')
 
-    for filename in glob('*.tmx'):
+def process_all_glob(glob_pattern):
+
+    for filename in glob(glob_pattern):
         print('found file {}'.format(filename))
         myTMX = MyTMX(filename)
 
@@ -663,4 +709,7 @@ def process_all_tmx_in_folder():
             json_file.write(json.dumps(myTMX.tmx_to_dict(), indent=4))
 
 
-process_all_tmx_in_folder()
+# process_all_tmx_in_folder()
+
+
+process_all_glob('enity_engine1.tmx')
